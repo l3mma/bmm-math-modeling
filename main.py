@@ -29,7 +29,3 @@ def read_triangles_vtk(filename):
             })
 
     return triangles
-
-triangles = read_triangles_vtk("sphere2.vtk")
-
-print(triangles[1]["ids"][2], triangles[1]["coords"][2])
