@@ -25,7 +25,9 @@ def read_triangles_vtk(filename):
             coord2 = point_coords[id2]
             triangles.append({
                 "ids": [id0, id1, id2],
-                "coords": [coord0, coord1, coord2]
+                "coords": [coord0, coord1, coord2],
+                "isMarked": False,
+                "timesMarked": 0
             })
 
     return triangles
