@@ -31,3 +31,19 @@ def read_triangles_vtk(filename):
             })
 
     return triangles
+
+def read_points_vtk(filename):
+    reader = vtk.vtkUnstructuredGridReader()
+    reader.SetFileName(filename)
+    reader.Update()
+    mesh = reader.GetOutput()
+
+    points = mesh.GetPoints()
+    num_points = points.GetNumberOfPoints()
+    point_coords = []
+
+    for i in range(num_points):
+        coords = points.GetPoint(i)
+        point_coords.append(coords)
+
+    return point_coords
