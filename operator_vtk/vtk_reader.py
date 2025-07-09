@@ -16,11 +16,7 @@ def vtk_reader_nodes(path):
     _nodes = mesh.points
     return _nodes
 
+# [x,y,z,isMarked]
 def markedProperty(nodes):
-    marked_nodes = np.column_stack((nodes, np.zeros(len(nodes))
+    marked_nodes = np.column_stack((nodes, np.zeros(len(nodes), dtype=int)))
     return marked_nodes
-
-cells = vtk_reader_cells("sphere.vtk")
-nodes = markedProperty(vtk_reader_nodes("sphere.vtk"))
-
-print(nodes)
