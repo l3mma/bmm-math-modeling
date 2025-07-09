@@ -1,15 +1,14 @@
-
 import numpy as np
-import vtk_reader
+from operator_vtk.vtk_reader import *
 import ray_tracing
 
 models = 'test11.vtk'
 particles = "vtk_gen.vtk"
 
 sourse_coords = [5, 5, 5]
-cells = vtk_reader.vtk_reader_cells(models)
-nodes = vtk_reader.vtk_reader_nodes(models)
-nodes_p = vtk_reader.vtk_reader_nodes(particles) + 3
+cells = vtk_reader_cells(models)
+nodes = vtk_reader_nodes(models)
+nodes_p = vtk_reader_nodes(particles) + 3
 cell_param = np.zeros(len(cells))
 
 

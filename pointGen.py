@@ -33,15 +33,8 @@ def rotation_z(angle):
         [0, 0, 1]
     ])
 
-def create_cone_surface(A_COEFF,B_COEFF, HEIGHT, SLICES):
-    points = []
-    for z in np.linspace(2, HEIGHT, SLICES):
-        scale = 1 - z/HEIGHT
-        for angle in np.linspace(0, 2 * np.pi):
-            x = A_COEFF * scale * np.cos(angle)
-            y = B_COEFF * scale * np.sin(angle)
-            points.append([x, y, z])
-    return np.array(points)
+def origin_point(HEIGHT):
+    return np.array([0.0, 0.0, HEIGHT])
 
 def generate_pt_inside(A_COEFF, B_COEFF, HEIGHT, NUM_POINTS):
     points = []
@@ -64,18 +57,13 @@ def rotation(points, angle_x, angle_y, angle_z):
     R_total = R_z @ R_y @ R_x
     return points @ R_total.T
 
-cone_surface = create_cone_surface(A_COEFF, B_COEFF, HEIGHT,SLICES)
+origin_pt = rotation(origin_point(HEIGHT), ANGLE_X, ANGLE_Y, ANGLE_Z)
 inner_pt = generate_pt_inside(A_COEFF, B_COEFF, HEIGHT, NUM_POINTS)
-rotated_cone = rotation(cone_surface, ANGLE_X, ANGLE_Y, ANGLE_Z)
 rotated_pt = rotation(inner_pt, ANGLE_X, ANGLE_Y, ANGLE_Z)
 
 
 fig = plt.figure(figsize=(12, 10))
 ax = fig.add_subplot(111, projection='3d')
-
-ax.scatter(rotated_cone[:, 0], rotated_cone[:, 1], rotated_cone[:, 2],
-           s=10, c='blue', alpha=0.3)
-
 ax.scatter(rotated_pt[:, 0], rotated_pt[:, 1], rotated_pt[:, 2],
            s=10, c='red', alpha=0.5)
 
