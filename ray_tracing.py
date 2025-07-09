@@ -1,7 +1,7 @@
-
 from numpy import cross, dot, array
+from operator_vtk.vtk_gen import *
 
-def ray_tracing(orig, part_point, point0, point1, point2):
+def ray_tracing_check(orig, part_point, point0, point1, point2):
 
     E1 = array(point1) - array(point0)
     E2 = array(point2) - array(point0)
@@ -20,11 +20,3 @@ def ray_tracing(orig, part_point, point0, point1, point2):
         return True
     else:
         return False
-
-
-# def ray_tracing(particles, triangles):
-#     for particle in particles:
-#         for triangle in triangles:
-
-if __name__ == "__main__":
-    print(ray_tracing([1, 0, 0], [0, 0, 1], [1, 0, 0], [0, 1, 0], [0, 0, 1]))
