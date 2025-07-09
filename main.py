@@ -4,7 +4,7 @@ import ray_tracing
 from cfg import HEIGHT, ANGLE_Z
 import numpy as np
 
-models = 'boat.vtk'
+models = 'output.vtk'
 particles = "vtk_gen.vtk"
 
 Z_ROTATION = rotation_z(ANGLE_Z)
