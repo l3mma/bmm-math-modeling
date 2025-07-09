@@ -53,7 +53,7 @@ origin_pt = rotation(origin_point(HEIGHT), ANGLE_X, ANGLE_Y, ANGLE_Z)
 inner_pt = generate_pt_inside(A_COEFF, B_COEFF, HEIGHT, NUM_POINTS)
 rotated_pt = rotation(inner_pt, ANGLE_X, ANGLE_Y, ANGLE_Z)
 
-with open("../vtk_gen.vtk", "w") as f:
+with open("vtk_gen.vtk", "w") as f:
     f.write("# vtk DataFile Version 2.0\n")
     f.write("vtk_gen, Created by Gmsh 4.14.0\n")
     f.write("ASCII\n")
