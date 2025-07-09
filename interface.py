@@ -162,7 +162,6 @@ tk.Button(top_right_frame, text="Import (Gmsh)", command=on_import_click, bg="#C
 tk.Button(top_right_frame, text="Сохранить как VTK", command=on_save_vtk_click, bg="#d0ffd0", font=("Arial", 11)).pack(side="left", padx=5)
 tk.Button(top_right_frame, text="Визуализировать", command=on_visualize_click, bg="#ffe0b3", font=("Arial", 11)).pack(side="left", padx=5)
 
-# Основная рабочая область (пока пустая)
 workspace = tk.Frame(root, bg="#f8f8f8")
 workspace.pack(fill="both", expand=True)
 
