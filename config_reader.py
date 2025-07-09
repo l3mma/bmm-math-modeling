@@ -1,5 +1,3 @@
-
-
 def read_config(config_path):
     params = {}
     int_params = ["Distribution_type", "Figure_type", "Numder_of_particles"]

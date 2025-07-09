@@ -1,5 +1,5 @@
 import numpy as np
-from config import *
+from cfg import *
 
 def rotation_x(angle):
     theta = np.radians(angle)
