@@ -1,0 +1,9 @@
+Model_path = ""
+
+# PARTICLES_CLOUD_PARAMETRS
+Distribution_type = 0
+Figure_type = 0
+Radius = 1
+Numder_of_particles = 1
+Orientation_angle = [1,1,1]
+Source = [1,1,1]
