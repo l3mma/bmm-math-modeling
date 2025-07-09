@@ -15,6 +15,11 @@ cell_param = np.zeros(len(cells))
 
 for cell_num in range(len(cells)):
     for part_num in range(len(nodes_p)):
-        cell_param[cell_num] += ray_tracing.ray_tracing_check(source_coords, nodes_p[part_num], nodes[cells[cell_num][0]], nodes[cells[cell_num][1]], nodes[cells[cell_num][2]])
+        sc = source_coords
+        particle = nodes_p[part_num]
+        v0 = nodes[cells[cell_num][0]]
+        v1 = nodes[cells[cell_num][1]]
+        v2 = nodes[cells[cell_num][2]]
+        cell_param[cell_num] += ray_tracing.ray_tracing_check(sc,particle,v0,v1,v2)
 
 print(cell_param)
