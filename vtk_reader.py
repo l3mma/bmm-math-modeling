@@ -3,7 +3,6 @@ import numpy as np
 
 def vtk_reader_cells(path):
     mesh = meshio.read(path)
-
     cells = []
     for cell_block in mesh.cells:
         cells.append(cell_block.data)

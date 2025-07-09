@@ -25,9 +25,6 @@ def rotation_z(angle):
         [0, 0, 1]
     ])
 
-def origin_point(HEIGHT):
-    return np.array([0.0, 0.0, HEIGHT])
-
 def generate_pt_inside(A_COEFF, B_COEFF, HEIGHT, NUM_POINTS):
     points = []
     while len(points) < NUM_POINTS:
@@ -49,29 +46,29 @@ def rotation(points, angle_x, angle_y, angle_z):
     R_total = R_z @ R_y @ R_x
     return points @ R_total.T
 
-origin_pt = rotation(origin_point(HEIGHT), ANGLE_X, ANGLE_Y, ANGLE_Z)
+def inner_pt_to_vtk(inner_pt):
+    with open("vtk_gen.vtk", "w") as f:
+        f.write("# vtk DataFile Version 2.0\n")
+        f.write("vtk_gen, Created by Gmsh 4.14.0\n")
+        f.write("ASCII\n")
+        f.write("DATASET UNSTRUCTURED_GRID\n\n")
+        f.write(f"POINTS {len(inner_pt)} float\n")
+
+        for x, y, z in inner_pt:
+            f.write(f"{x} {y} {z}\n")
+        f.write("\n")
+
+        f.write(f"CELLS {len(inner_pt)} {len(inner_pt) * 2}\n")
+
+        for i in range(len(inner_pt)):
+            f.write(f"1 {i}\n")
+
+        f.write("\n")
+
+        f.write(f"CELL_TYPES {len(inner_pt)}\n")
+
+        for _ in range(len(inner_pt)):
+            f.write("1\n")
+
 inner_pt = generate_pt_inside(A_COEFF, B_COEFF, HEIGHT, NUM_POINTS)
-rotated_pt = rotation(inner_pt, ANGLE_X, ANGLE_Y, ANGLE_Z)
-
-with open("vtk_gen.vtk", "w") as f:
-    f.write("# vtk DataFile Version 2.0\n")
-    f.write("vtk_gen, Created by Gmsh 4.14.0\n")
-    f.write("ASCII\n")
-    f.write("DATASET UNSTRUCTURED_GRID\n\n")
-    f.write(f"POINTS {len(inner_pt)} float\n")
-
-    for x, y, z in inner_pt:
-        f.write(f"{x} {y} {z}\n")
-    f.write("\n")
-
-    f.write(f"CELLS {len(inner_pt)} {len(inner_pt) * 2}\n")
-
-    for i in range(len(inner_pt)):
-        f.write(f"1 {i}\n")
-
-    f.write("\n")
-
-    f.write(f"CELL_TYPES {len(inner_pt)}\n")
-
-    for _ in range(len(inner_pt)):
-        f.write("1\n")
+inner_pt_to_vtk(inner_pt)
