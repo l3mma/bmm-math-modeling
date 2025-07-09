@@ -1,5 +1,4 @@
 from numpy import cross, dot, array
-from operator_vtk.vtk_gen import *
 
 def ray_tracing_check(orig, part_point, point0, point1, point2):
 

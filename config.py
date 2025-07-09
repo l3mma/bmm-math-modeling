@@ -1,8 +1,8 @@
 #particles generation
 A_COEFF, B_COEFF = 1, 1
 HEIGHT = 1
-ANGLE_X = 90
-ANGLE_Y = -30
-ANGLE_Z = -45
+ANGLE_X = 0
+ANGLE_Y = 0
+ANGLE_Z = 0
 NUM_POINTS = 1000
 SLICES = 20

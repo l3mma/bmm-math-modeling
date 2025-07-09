@@ -10,7 +10,7 @@ source_coords = rotation_z(ANGLE_Z) @ np.array([0.0, 0.0, HEIGHT])
 
 cells = vtk_reader_cells(models)
 nodes = vtk_reader_nodes(models)
-nodes_p = vtk_reader_nodes(particles) + 3
+nodes_p = vtk_reader_nodes(particles)
 cell_param = np.zeros(len(cells))
 
 for cell_num in range(len(cells)):

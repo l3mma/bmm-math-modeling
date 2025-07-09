@@ -30,7 +30,7 @@ def origin_point(HEIGHT):
 
 def generate_pt_inside(A_COEFF, B_COEFF, HEIGHT, NUM_POINTS):
     points = []
-    while  len(points) < NUM_POINTS:
+    while len(points) < NUM_POINTS:
         z = np.random.uniform(HEIGHT/2,HEIGHT)
         scale = 1 - z/HEIGHT
         r = np.sqrt(np.random.uniform(0,1))
