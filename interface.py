@@ -39,7 +39,7 @@ def on_import_click():
     global gmsh_proc, gmsh_exe_path, last_cad_file
     cad_file = filedialog.askopenfilename(
         title="Выберите CAD файл",
-        filetypes=[("CAD файлы", "*.step *.stp *.iges *.igs *.x_t *.x_b *.sat *.sab")]
+        filetypes=[("CAD файлы", "*.step *.stp *.iges *.igs *.x_t *.x_b *.sat *.sab *.vtk")]
     )
     if not cad_file:
         return
@@ -85,27 +85,37 @@ def on_save_vtk_click():
 
 def on_visualize_click():
     global paraview_proc
+
+    vtk_path_1 = os.path.join(os.getcwd(), "output", "model.vtk")
+    if not os.path.exists(vtk_path_1):
+        messagebox.showerror("Ошибка", "VTK-файл модели (model.vtk) не найден. Сначала сохраните его.")
+        return
+
+    txt_file = filedialog.askopenfilename(
+        title="Выберите .txt файл с параметрами облака частиц",
+        filetypes=[("Text files", "*.txt")]
+    )
+    if not txt_file:
+        messagebox.showinfo("Отмена", "Файл с параметрами не выбран. Визуализация отменена.")
+        return
+
     paraview_exe = filedialog.askopenfilename(
         title="Выберите путь до ParaView.exe",
         filetypes=[("ParaView Executable", "*.exe")]
     )
     if not paraview_exe:
-        return
-
-    vtk_path = os.path.join(os.getcwd(), "output", "model.vtk")
-    if not os.path.exists(vtk_path):
-        messagebox.showerror("Ошибка", "VTK-файл не найден. Сначала сохраните его.")
+        messagebox.showinfo("Отмена", "Путь к ParaView не выбран. Визуализация отменена.")
         return
 
     kill_process(paraview_proc)
-    paraview_proc = subprocess.Popen([paraview_exe, vtk_path])
+    paraview_proc = subprocess.Popen([paraview_exe, vtk_path_1, txt_file])
     threading.Thread(target=lambda: (time.sleep(2), bring_window_to_front(paraview_proc.pid)), daemon=True).start()
 
 
 # === Интерфейс ===
 
 root = tk.Tk()
-root.title("CAD Workflow")
+root.title("жДЛИВЫАжОФИажгщФсжОФИЫВАЖгПФВЗЫШГЖАиЖШФЫГАЗ")
 root.state("zoomed")
 root.configure(bg="white")
 
@@ -119,7 +129,7 @@ button_style = {"font": ("Arial", 11), "bg": "#e0e0e0", "padx": 10, "pady": 6}
 button_row = tk.Frame(top_frame, bg="white")
 button_row.pack(side="top", padx=10, pady=10)
 
-tk.Button(button_row, text="Import (Gmsh)", command=on_import_click, **button_style).pack(side="left", padx=5)
+tk.Button(button_row, text="Import (Gmsh)", command=on_import_click, bg="#C8A2C8" ,font=("Arial", 11)).pack(side="left", padx=5)
 tk.Button(button_row, text="Сохранить как VTK", command=on_save_vtk_click, bg="#d0ffd0", font=("Arial", 11)).pack(side="left", padx=5)
 tk.Button(button_row, text="Визуализировать", command=on_visualize_click, bg="#ffe0b3", font=("Arial", 11)).pack(side="left", padx=5)
 
