@@ -10,7 +10,7 @@ import win32con
 
 # === Глобальные переменные ===
 gmsh_proc = None
-freecad_proc = None
+paraview_proc = None
 gmsh_exe_path = None
 last_cad_file = None
 
@@ -83,62 +83,24 @@ def on_save_vtk_click():
 
     kill_process(gmsh_proc)
 
-def on_make_click():
-    global freecad_proc
-    freecad_exe = filedialog.askopenfilename(
-        title="Выберите путь до FreeCAD.exe",
-        filetypes=[("FreeCAD Executable", "*.exe")]
+def on_visualize_click():
+    global paraview_proc
+    paraview_exe = filedialog.askopenfilename(
+        title="Выберите путь до ParaView.exe",
+        filetypes=[("ParaView Executable", "*.exe")]
     )
-    if not freecad_exe:
+    if not paraview_exe:
         return
 
-    kill_process(freecad_proc)
-    freecad_proc = subprocess.Popen([freecad_exe])
-    threading.Thread(target=lambda: (time.sleep(2), bring_window_to_front(freecad_proc.pid)), daemon=True).start()
-
-def on_export_iges_click():
-    global freecad_proc
-    fcstd_file = filedialog.askopenfilename(
-        title="Выберите .FCStd файл (FreeCAD)",
-        filetypes=[("FreeCAD Document", "*.FCStd")]
-    )
-    if not fcstd_file:
+    vtk_path = os.path.join(os.getcwd(), "output", "model.vtk")
+    if not os.path.exists(vtk_path):
+        messagebox.showerror("Ошибка", "VTK-файл не найден. Сначала сохраните его.")
         return
 
-    freecad_cmd = filedialog.askopenfilename(
-        title="Выберите FreeCADCmd.exe",
-        filetypes=[("FreeCADCmd Executable", "*.exe")]
-    )
-    if not freecad_cmd:
-        return
+    kill_process(paraview_proc)
+    paraview_proc = subprocess.Popen([paraview_exe, vtk_path])
+    threading.Thread(target=lambda: (time.sleep(2), bring_window_to_front(paraview_proc.pid)), daemon=True).start()
 
-    save_path = filedialog.asksaveasfilename(
-        title="Сохранить как IGES",
-        defaultextension=".iges",
-        filetypes=[("IGES files", "*.iges")]
-    )
-    if not save_path:
-        return
-
-    script_path = os.path.join(os.getcwd(), "export_iges_temp.py")
-    with open(script_path, "w", encoding="utf-8") as f:
-        f.write(f"""
-import FreeCAD
-import ImportGui
-doc = FreeCAD.open("{fcstd_file.replace("\\\\", "/")}")
-objects = [obj for obj in doc.Objects if hasattr(obj, "Shape")]
-ImportGui.export(objects, "{save_path.replace("\\\\", "/")}")
-""")
-    try:
-        subprocess.run([freecad_cmd, script_path], check=True)
-        messagebox.showinfo("Успех", f"IGES сохранён:\n{save_path}")
-    except Exception as e:
-        messagebox.showerror("Ошибка экспорта", str(e))
-    finally:
-        if os.path.exists(script_path):
-            os.remove(script_path)
-
-    kill_process(freecad_proc)
 
 # === Интерфейс ===
 
@@ -152,19 +114,14 @@ top_frame.pack(side="top", anchor="nw", fill="x")
 
 button_style = {"font": ("Arial", 11), "bg": "#e0e0e0", "padx": 10, "pady": 6}
 
-# Левая часть с кнопками Import + Сохранить VTK
-left_buttons_frame = tk.Frame(top_frame, bg="white")
-left_buttons_frame.pack(side="left", padx=10, pady=10)
+# === Панель кнопок ===
 
-tk.Button(left_buttons_frame, text="Import (Gmsh)", command=on_import_click, **button_style).pack(side="top", pady=5)
-tk.Button(left_buttons_frame, text="Сохранить как VTK", command=on_save_vtk_click, bg="#d0ffd0", font=("Arial", 11)).pack(side="top", pady=5)
+button_row = tk.Frame(top_frame, bg="white")
+button_row.pack(side="top", padx=10, pady=10)
 
-# Левая часть с кнопками Make + Сохранить CAD (IGES)
-right_buttons_frame = tk.Frame(top_frame, bg="white")
-right_buttons_frame.pack(side="left", padx=40, pady=10)
-
-tk.Button(right_buttons_frame, text="Make in FreeCAD", command=on_make_click, **button_style).pack(side="top", pady=5)
-tk.Button(right_buttons_frame, text="Сохранить CAD (IGES)", command=on_export_iges_click, bg="#d0e0ff", font=("Arial", 11)).pack(side="top", pady=5)
+tk.Button(button_row, text="Import (Gmsh)", command=on_import_click, **button_style).pack(side="left", padx=5)
+tk.Button(button_row, text="Сохранить как VTK", command=on_save_vtk_click, bg="#d0ffd0", font=("Arial", 11)).pack(side="left", padx=5)
+tk.Button(button_row, text="Визуализировать", command=on_visualize_click, bg="#ffe0b3", font=("Arial", 11)).pack(side="left", padx=5)
 
 workspace = tk.Frame(root, bg="#f8f8f8")
 workspace.pack(fill="both", expand=True)
