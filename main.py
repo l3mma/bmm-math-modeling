@@ -1,57 +1,50 @@
-from vtk_reader import *
-from vtk_gen import rotation_z
-import ray_tracing
-from config import HEIGHT, ANGLE_Z
 import numpy as np
+from particle_generator import sphere_cloud
+from vtk_reader import vtk_reader_cells, vtk_reader_nodes
+import ray_tracing
+from config_reader import read_config
+from marker_cell import marker_cell
+import meshio
 
-models = 'cone.vtk'
-particles = "vtk_gen.vtk"
+_params = read_config("config.txt")
 
-Z_ROTATION = rotation_z(ANGLE_Z)
-source_coords = Z_ROTATION @ np.array([0.0, 0.0, HEIGHT])
+print(_params)
+models = 'test_file.vtk'
+sphere_cloud(_params['distribution_type'], _params['Numder_of_particles'],_params['Radius'],_params['Path_cloud'])
+particles = _params['Path_cloud'] + "\\particles.vtk"
+
+print(particles)
+source_coords = _params["Source"]
 cells = vtk_reader_cells(models)
 nodes = vtk_reader_nodes(models)
 nodes_p = vtk_reader_nodes(particles)
 cell_param = np.zeros(len(cells))
 
-for cell_num in range(len(cells)):
-    for part_num in range(len(nodes_p)):
-        sc = source_coords
-        particle = nodes_p[part_num]
-        v0 = nodes[cells[cell_num][0]]
-        v1 = nodes[cells[cell_num][1]]
-        v2 = nodes[cells[cell_num][2]]
-        if ray_tracing.ray_tracing_check(sc, particle, v0, v1, v2):
-            cell_param[cell_num] += 1
+for part_num in range(len(nodes_p)):
+    length = 0
+    answer = 0
+    interaction, min_interaction = [], [-1, 0]
+    for cell_num in range(len(cells)):
+        answer, length = ray_tracing.ray_tracing_check(source_coords, nodes_p[part_num], nodes[cells[cell_num][0]], nodes[cells[cell_num][1]], nodes[cells[cell_num][2]])
+        if answer == True:
+            interaction = [length, cell_num]
+            if interaction[0] >= min_interaction[0]:
+                min_interaction = interaction
+    if min_interaction[0] >= 0:
+        cell_param[min_interaction[1]] = 1
 
-with open("output_colored.vtk", "w") as f:
-    f.write("# vtk DataFile Version 2.0\n")
-    f.write("Colored Mesh with Intersections\n")
-    f.write("ASCII\n")
-    f.write("DATASET UNSTRUCTURED_GRID\n\n")
-    f.write(f"POINTS {len(nodes)} float\n")
+# for part_num in range(len(nodes_p)):
+#     length = 0
+#     answer = 0
+#     interactions, min_ray = [], []
+#     for cell_num in range(len(cells)):
+#         answer, length = ray_tracing.ray_tracing_check(source_coords, nodes_p[part_num], nodes[cells[cell_num][0]], nodes[cells[cell_num][1]], nodes[cells[cell_num][2]])
+#         if answer == True:
+#             interactions.append([length, cell_num])
+#     if len(interactions) != 0:
+#         min_ray = min(interactions, key = lambda x: x[0])
+#         cell_param[min_ray[1]] = 1
 
-    for x, y, z in nodes:
-        f.write(f"{x} {y} {z}\n")
-    f.write("\n")
-    f.write(f"CELLS {len(cells)} {len(cells) * 4}\n")
-    for cell in cells:
-        f.write(f"3 {cell[0]} {cell[1]} {cell[2]}\n")
-    f.write("\n")
-
-    # triangle type 5
-    f.write(f"CELL_TYPES {len(cells)}\n")
-    for _ in cells:
-        f.write("5\n")
-    f.write("\n")
-
-    # color cells
-    f.write(f"CELL_DATA {len(cells)}\n")
-    f.write("SCALARS cell_color float 3\n")  # RGB
-    f.write("LOOKUP_TABLE custom_colors\n")
-    for param in cell_param:
-        if param > 0:
-            f.write("1.0 0.0 0.0\n")
-        else:
-            f.write("0.7 0.7 0.7\n")
-    f.write("\n")
+print(cell_param)
+path_save = _params['Path_cloud']
+marker_cell(nodes, cells, cell_param, path_save)

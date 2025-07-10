@@ -1,6 +1,6 @@
 def read_config(config_path):
     params = {}
-    int_params = ["Distribution_type", "Figure_type", "Numder_of_particles"]
+    int_params = ["Figure_type", "Numder_of_particles"]
     float_params = ["Radius"]
     vector_params = ["Orientation_angle", "Source"]
     with open(config_path, "r") as file:
@@ -42,8 +42,3 @@ def read_config(config_path):
             else:
                 params[key] = value
     return params
-
-
-
-if __name__ == "__main__":
-    print(list(read_config("config.txt").values()))

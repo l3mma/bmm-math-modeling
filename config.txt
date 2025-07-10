@@ -1,9 +1,13 @@
-Model_path = ""
+Model_path = ''
 
 # PARTICLES_CLOUD_PARAMETRS
-Distribution_type = 0
+
 Figure_type = 0
 Radius = 1
-Numder_of_particles = 1
+Numder_of_particles = 90
 Orientation_angle = [1,1,1]
-Source = [1,1,1]
+Source = [4,4,4]
+Path_cloud = B:\\GMM_2025\\Project\\data
+# distribution type is gaussian or uniform
+distribution_type = uniform
+
