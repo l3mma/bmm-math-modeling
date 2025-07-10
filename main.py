@@ -1,7 +1,7 @@
 from vtk_reader import *
 from vtk_gen import rotation_z
 import ray_tracing
-from cfg import HEIGHT, ANGLE_Z
+from config import HEIGHT, ANGLE_Z
 import numpy as np
 
 models = 'cone.vtk'
@@ -9,7 +9,6 @@ particles = "vtk_gen.vtk"
 
 Z_ROTATION = rotation_z(ANGLE_Z)
 source_coords = Z_ROTATION @ np.array([0.0, 0.0, HEIGHT])
-
 cells = vtk_reader_cells(models)
 nodes = vtk_reader_nodes(models)
 nodes_p = vtk_reader_nodes(particles)
