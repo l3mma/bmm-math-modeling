@@ -42,3 +42,20 @@ def read_config(config_path):
             else:
                 params[key] = value
     return params
+
+def read_config_cone(config_path):
+    params = {"A": 0.0, "B": 0.0, "RADIUS": 1.0, "HEIGHT": 0.0, "NUM_POINTS": 0,"LEVELS" : 0}
+    keys = list(params.keys())
+    flag = False
+    with open(config_path, "r") as file:
+        data = file.readlines()
+        for line in data:
+            if "# PARTICLES_CONE_PARAMETRS" in line:
+                flag = True
+            if flag:
+                for i in range(len(keys) - 2):
+                    params[keys[i]], buf = float(line.split(" = ")[1])
+
+            params[keys[len(keys) - 2]], buf = int(line.split(" = ")[1])
+            params[keys[len(keys) - 1]], buf = int(line.split(" = ")[1])
+            break

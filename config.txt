@@ -11,3 +11,11 @@ Path_cloud = B:\\GMM_2025\\Project\\data
 # distribution type is gaussian or uniform
 distribution_type = gaussian
 
+# PARTICLES_CONE_PARAMETRS
+A_COEFFICENT = 1.0
+B_COEFFICENT = 1.0
+RADIUS = 1.0
+HEIGHT = 1.0
+NUM_POINTS = 100
+LEVELS = 10
+

@@ -45,3 +45,16 @@ def sphere_cloud(distribution, num_points, radius, path_particles, center, sigma
 # points = sphere_cloud('gaussian',n,R,0, center)
 #
 # plot_parts(points)
+
+def cone_cloud(A_COEFFICENT, B_COEFFICENT, RADIUS, HEIGHT,  NUM_POINTS,LEVELS):
+    points = []
+    ANGLE_OF_17_SIDES_TRIANGLE = 2 * np.pi / 17
+    for z in np.linspace(0, HEIGHT, LEVELS):
+        scale = 1 - z/HEIGHT
+        for angle in np.linspace(0, 2 * np.pi, ANGLE_OF_17_SIDES_TRIANGLE):
+            x = A_COEFFICENT * scale * RADIUS * np.cos(angle)
+            y = B_COEFFICENT * scale * RADIUS * np.sin(angle)
+            points = np.vstack([x, y, z]).T
+
+    return points
+
