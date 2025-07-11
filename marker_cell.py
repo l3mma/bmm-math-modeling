@@ -24,9 +24,14 @@ def marker_cell(nodes, cells, cell_param, path_save):
         f.write(f"CELL_DATA {len(cells)}\n")
         f.write("SCALARS cell_color float 1\n")  # RGB
         f.write("LOOKUP_TABLE custom_colors\n")
+        # for param in cell_param:
+        #     if param > 0:
+        #         f.write("2\n")
+        #     else:
+        #         f.write("0\n")
         for param in cell_param:
             if param > 0:
-                f.write("2\n")
+                f.write(f"{param}\n")
             else:
                 f.write("0\n")
         f.write("\n")

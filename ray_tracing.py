@@ -11,11 +11,10 @@ def ray_tracing_check(orig, part_point, point0, point1, point2):
     if total_det == 0:
         return False, 0
 
-    # t = dot(cross(T, E1), E2) / total_det
+    t = dot(cross(T, E1), E2) / total_det
     u = dot(cross(D, E2), T) / total_det
     v = dot(cross(T, E1), D) / total_det
-
-    if u >= 0 and v >= 0 and (u + v) <= 1:
-        return True, dot(cross(T, E1), E2) / total_det
+    if u >= 0 and v >= 0 and (u + v) <= 1 and t > 0:
+        return True, t
     else:
         return False, 0

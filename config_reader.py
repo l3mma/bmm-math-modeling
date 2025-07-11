@@ -31,7 +31,7 @@ def read_config(config_path):
             elif key in vector_params:
                 if value[0] == "[" and value[-1] == "]":
                     try:
-                        value = list(map(int, value[1:-1].split(",")))
+                        value = list(map(float, value[1:-1].split(",")))
                         params[key] = value
                     except ValueError:
                         print(f"В {key} должны быть перечислены координаты через ',', координаты должны быть числами")
