@@ -25,11 +25,11 @@ def vtk_writer(path_particles, points, cells=[], cells_data=[], points_data=[]):
                 f.write("5\n")
 
         if len_cd != 0:
+            f.write("\n")
+            f.write(f"CELL_DATA {len_c}")
             for name_cd in cells_data.keys():
                 if len(cells_data[name_cd]['data']) != len_c:
                     raise ValueError(f"Длина массива параметров ячеек {len(cells_data[name_cd]['data'])} /= числу ячеек {len_c}")
-                f.write("\n")
-                f.write(f"CELL_DATA {len_c}\n")
                 if cells_data[name_cd]['type'] == 'SCALARS':
                     f.write(f"SCALARS {name_cd} float\n")
                     f.write("LOOKUP_TABLE default\n")
@@ -41,11 +41,11 @@ def vtk_writer(path_particles, points, cells=[], cells_data=[], points_data=[]):
                         f.write(f"{data[0]} {data[1]} {data[2]}\n")
 
         if len_pd != 0:
+            f.write("\n")
+            f.write(f"POINT_DATA {len_p}\n")
             for name_pd in points_data.keys():
                 if len(points_data[name_pd]['data']) != len_p:
                     raise ValueError(f"Длина массива параметров ячеек {len(points_data[name_pd]['data'])} /= числу ячеек {len_p}")
-                f.write("\n")
-                f.write(f"POINTS_DATA {len_p}\n")
                 if points_data[name_pd]['type'] == 'SCALARS':
                     f.write(f"SCALARS {name_pd} float\n")
                     f.write("LOOKUP_TABLE default\n")
