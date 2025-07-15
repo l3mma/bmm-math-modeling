@@ -1,5 +1,3 @@
-import numpy as np
-import vtk_reader
 def vtk_writer(path_particles, points, cells=[], cells_data=[], points_data=[], cells_data_name=[], points_data_name=[]):
     with open(path_particles, "w") as f:
         f.write("# vtk DataFile Version 2.0\n")
@@ -12,7 +10,7 @@ def vtk_writer(path_particles, points, cells=[], cells_data=[], points_data=[], 
             f.write(f"{x} {y} {z}\n")
         f.write("\n")
 
-        if len(cells) != []:
+        if len(cells) != 0:
             num_verteces = len(cells[0])
             f.write(f"CELLS {len(cells)} {len(cells) * (num_verteces + 1)}\n")
             for cell in cells:
@@ -56,5 +54,3 @@ def vtk_writer(path_particles, points, cells=[], cells_data=[], points_data=[], 
                     f.write(f"VECTORS {points_data_name[num_points_data]} float\n")
                     for data in points_data[num_points_data]:
                         f.write(f"{data[0]} {data[1]} {data[2]}\n")
-
-
