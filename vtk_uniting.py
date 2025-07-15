@@ -10,24 +10,59 @@ def extract_section(lines, section_name):
     header_line = lines[start_index]
     section_data = []
     for i in range(start_index + 1, len(lines)):
-        if lines[i].strip().upper().startswith(("POINTS", "CELLS", "CELL_TYPES", "CELL_DATA", "POINT_DATA")):
+        if lines[i].strip().upper().startswith((
+            "POINTS", "CELLS", "CELL_TYPES", "CELL_DATA", "POINT_DATA"
+        )):
             return header_line, section_data, i
         section_data.append(lines[i])
     return header_line, section_data, len(lines)
 
 
-def merge_sections(section_name, header1, data1, header2, data2):
+def merge_sections(section_name, header1, data1, header2, data2, point_count1=0):
     if header1 and header2:
         if section_name == "POINTS":
             point_count1 = int(header1.strip().split()[1])
             point_count2 = int(header2.strip().split()[1])
             data_type = header1.strip().split()[2]
-            return [f"POINTS {point_count1 + point_count2} {data_type}\n"], data1 + data2, point_count1, point_count2
+
+            clean_data2 = []
+            for line in data2:
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                parts = stripped.split()
+                if len(parts) != 3:
+                    continue
+                try:
+                    coords = list(map(float, parts))
+                    clean_data2.append(f"{coords[0]} {coords[1]} {coords[2]}\n")
+                except ValueError:
+                    continue
+
+            return [f"POINTS {point_count1 + point_count2} {data_type}\n"], data1 + clean_data2, point_count1, point_count2
 
         elif section_name == "CELLS":
             cell_count1, index_count1 = map(int, header1.strip().split()[1:3])
             cell_count2, index_count2 = map(int, header2.strip().split()[1:3])
-            return [f"CELLS {cell_count1 + cell_count2} {index_count1 + index_count2}\n"], data1 + data2, None, None
+
+            shifted_data2 = []
+            for line in data2:
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                parts = stripped.split()
+                if len(parts) < 2:
+                    continue
+                try:
+                    n = int(parts[0])
+                    indices = [str(int(p) + point_count1) for p in parts[1:]]
+                    shifted_data2.append(f"{n} {' '.join(indices)}\n")
+                except ValueError:
+                    continue
+
+            merged_data = data1 + shifted_data2
+            merged_header = [f"CELLS {cell_count1 + cell_count2} {index_count1 + index_count2}\n"]
+            return merged_header, merged_data, None, None
 
         elif section_name == "CELL_TYPES":
             type_count1 = int(header1.strip().split()[1])
@@ -54,7 +89,9 @@ def merge_vtk_files(file1_path, file2_path, output_path):
     index = 0
     while index < len(lines1):
         line = lines1[index]
-        if line.strip().upper().startswith(("POINTS", "CELLS", "CELL_TYPES", "CELL_DATA", "POINT_DATA")):
+        if line.strip().upper().startswith((
+            "POINTS", "CELLS", "CELL_TYPES", "CELL_DATA", "POINT_DATA"
+        )):
             break
         merged_output.append(line)
         index += 1
@@ -72,14 +109,17 @@ def merge_vtk_files(file1_path, file2_path, output_path):
         header1, data1, next_index1 = extract_section(lines1[current_index1:], section_name)
         header2, data2, next_index2 = extract_section(lines2[current_index2:], section_name)
 
-        merged_header, merged_data, count1, count2 = merge_sections(section_name, header1, data1, header2, data2)
-        merged_output.extend(merged_header)
-        merged_output.extend(merged_data)
+        merged_header, merged_data, count1, count2 = merge_sections(
+            section_name, header1, data1, header2, data2, point_count1
+        )
 
         if section_name == "POINTS":
             point_count1 = count1 or 0
             point_count2 = count2 or 0
             total_point_count = point_count1 + point_count2
+
+        merged_output.extend(merged_header)
+        merged_output.extend(merged_data)
 
         current_index1 += next_index1
         current_index2 += next_index2
@@ -99,12 +139,10 @@ def merge_vtk_files(file1_path, file2_path, output_path):
     if total_point_count > 0:
         merged_output.append(f"POINT_DATA {total_point_count}\n")
         merged_output.append("VECTORS RAD float\n")
-
         merged_output.extend(["0.0 0.0 0.0\n"] * point_count1)
-
         merged_output.extend(["0.1 0.0 0.0\n"] * point_count2)
 
     with open(output_path, 'w') as output_file:
         output_file.writelines(merged_output)
 
-merge_vtk_files("output_colored.vtk", "vtk_gen.vtk", "united.vtk")
+merge_vtk_files("united.vtk", "vtk_gen.vtk", "united_new.vtk")
