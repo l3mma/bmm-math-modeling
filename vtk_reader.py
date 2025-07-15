@@ -12,8 +12,8 @@ def vtk_reader(path):
         cells.append(cell_block.data)
 
     _cells = []
-    for i in cells:
-        if i.shape[1] == 3: # for triangle
-            _cells = i
+    for cell in cells:
+        if cell.shape[1] == 3: # for triangle
+            _cells = cell
 
     return _cells, _nodes, _cell_data, _point_data
