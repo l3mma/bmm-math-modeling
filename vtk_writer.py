@@ -26,7 +26,7 @@ def vtk_writer(path_particles, points, cells=[], cells_data=[], points_data=[]):
 
         if len_cd != 0:
             f.write("\n")
-            f.write(f"CELL_DATA {len_c}")
+            f.write(f"CELL_DATA {len_c}\n")
             for name_cd in cells_data.keys():
                 if cells_data[name_cd].shape[0] != len_c:
                     raise ValueError(f"Длина массива параметров ячеек {len(cells_data[name_cd].shape[0])} /= числу ячеек {len_c}")
