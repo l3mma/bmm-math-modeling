@@ -1,9 +1,38 @@
 import numpy as np
 from vtk_generator import vtk_point_generator
-import matplotlib.pyplot as plt
-def sphere_cloud(num_points, radius, path_particles, center=[0,0,0], distribution = 'uniform', sigma=0.5):
+
+def disk_cloud(num_points, radius, path_particles, filename_cloud, center=[0,0,0],angle_rot = [0,0,0], distribution = 'uniform', sigma=0.5):
+    if distribution == 'uniform':
+
+        phi = np.random.uniform(0, 2 * np.pi, num_points)
+        rho = np.random.uniform(0, 1, num_points)
+        r = radius * np.sqrt(rho)
+        x = r * np.cos(phi)
+        y = r * np.sin(phi)
+        z = np.zeros(num_points)
+
+    elif distribution == 'gaussian':
+
+        x = np.random.normal(0, sigma, num_points)
+        y = np.random.normal(0, sigma, num_points)
+        x /= (abs(x).max() / radius)
+        y /= (abs(y).max() / radius)
+        z = np.zeros(num_points)
+
+    else:
+        raise ValueError("Неизвестное распределение")
+
+    points = np.vstack([x, y, z]).T
+    points = rotate(points, angle_rot)
+    #vtk_point_generator(points + center, path_particles, filename_cloud)
+    vector = rotate([0,0,1], angle_rot) + center
+    normal_vector = vector / np.linalg.norm(vector)
+
+    return points + center, normal_vector
+def sphere_cloud(num_points, radius, path_particles, filename_cloud, center=[0,0,0], distribution = 'uniform', sigma=0.5):
 
     if distribution == 'uniform':
+
         phi = np.random.uniform(0, 2 * np.pi, num_points)
         theta = np.arccos(np.random.uniform(-1, 1, num_points))
         rho = np.random.uniform(0, 1, num_points)
@@ -11,10 +40,9 @@ def sphere_cloud(num_points, radius, path_particles, center=[0,0,0], distributio
         x = r * np.sin(theta) * np.cos(phi)
         y = r * np.sin(theta) * np.sin(phi)
         z = r * np.cos(theta)
-        points = np.vstack([x, y, z]).T
-        vtk_point_generator(points + center, path_particles)
 
     elif distribution == 'gaussian':
+
         x = np.random.normal(0, sigma, num_points)
         y = np.random.normal(0, sigma, num_points)
         z = np.random.normal(0, sigma, num_points)
@@ -22,26 +50,40 @@ def sphere_cloud(num_points, radius, path_particles, center=[0,0,0], distributio
         y /= (abs(y).max() / radius)
         z /= (abs(z).max() / radius)
 
-        points = np.vstack([x, y, z]).T
-        vtk_point_generator(points + center, path_particles)
+    else:
+        raise ValueError("Неизвестное распределение")
+
+    points = np.vstack([x, y, z]).T
+    #vtk_point_generator(points + center, path_particles, filename_cloud)
+
+    return points + center
+
+def cone_cloud(num_points, radius, path_particles, height, filename_cloud, center=[0,0,0], angle_rot = [0,0,0], distribution='uniform',sigma_r=0.5, sigma_z=0.5):
+    if distribution == 'uniform':
+
+        z = np.sqrt(np.random.uniform(0, 1, num_points)) * height
+        r = (z / height) * radius * np.sqrt(np.random.uniform(0, 1, num_points))
+        theta = np.random.uniform(0, 2 * np.pi, num_points)
+        x = r * np.cos(theta)
+        y = r * np.sin(theta)
+
+    elif distribution == 'gaussian':
+
+        z = np.sqrt(np.abs(np.random.normal(0, sigma_z, num_points)))
+        z = (z - z.min()) / (z.max() - z.min()) * height
+        rho = (z / height) * radius
+        r = np.abs(np.random.normal(0, sigma_r, num_points))
+        r *= (rho / r.max())
+        theta = np.random.uniform(0, 2 * np.pi, num_points)
+        x = r * np.cos(theta)
+        y = r * np.sin(theta)
 
     else:
         raise ValueError("Неизвестное распределение")
 
-    return points + center
-
-def cone_cloud(num_points, radius, path_particles, center, height, angle_rot, distribution='uniform',sigma=0.5):
-    if distribution == 'uniform':
-        z = np.sqrt(np.random.uniform(0, 1, num_points)) * height
-        r = (z / height) * radius * np.sqrt(np.random.uniform(0, 1, num_points))
-        angles = np.random.uniform(0, 2 * np.pi, num_points)
-        x = r * np.cos(angles)
-        y = r * np.sin(angles)
-
-        points = np.vstack([x, y, z]).T
-
-        points = rotate(points, angle_rot)
-        vtk_point_generator(points + center, path_particles)
+    points = np.vstack([x, y, z]).T
+    points = rotate(points, angle_rot)
+    #vtk_point_generator(points + center, path_particles, filename_cloud)
 
     return points + center
 
