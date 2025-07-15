@@ -9,12 +9,14 @@ def extract_section(lines, section_name):
 
     header_line = lines[start_index]
     section_data = []
+
     for i in range(start_index + 1, len(lines)):
         if lines[i].strip().upper().startswith((
             "POINTS", "CELLS", "CELL_TYPES", "CELL_DATA", "POINT_DATA"
         )):
             return header_line, section_data, i
         section_data.append(lines[i])
+
     return header_line, section_data, len(lines)
 
 
@@ -136,13 +138,28 @@ def merge_vtk_files(file1_path, file2_path, output_path):
         merged_output.extend(cell_data_body1)
         merged_output.extend(cell_data_body2)
 
+    def has_only_points(lines):
+        for line in lines:
+            l = line.strip().upper()
+            if l.startswith(("CELLS", "CELL_TYPES", "CELL_DATA", "POINT_DATA")):
+                return False
+        return True
+
+    only_points_in_file1 = has_only_points(lines1)
+    only_points_in_file2 = has_only_points(lines2)
+    only_points_total = only_points_in_file1 and only_points_in_file2
+
     if total_point_count > 0:
         merged_output.append(f"POINT_DATA {total_point_count}\n")
         merged_output.append("VECTORS RAD float\n")
-        merged_output.extend(["0.0 0.0 0.0\n"] * point_count1)
-        merged_output.extend(["0.1 0.0 0.0\n"] * point_count2)
+
+        if only_points_total:
+            merged_output.extend(["0.5 0.0 0.0\n"] * total_point_count)
+        else:
+            merged_output.extend(["0.0 0.0 0.0\n"] * total_point_count)
 
     with open(output_path, 'w') as output_file:
         output_file.writelines(merged_output)
+
 
 merge_vtk_files("united.vtk", "vtk_gen.vtk", "united_new.vtk")
