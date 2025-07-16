@@ -1,6 +1,5 @@
 import numpy as np
-import logging,argparse,sys,time,os
-
+import logging, argparse, sys, time, os
 import ray_tracing
 from particle_generator import sphere_cloud, cone_cloud
 from vtk_reader import vtk_reader
@@ -9,7 +8,9 @@ from config_reader import parse_config
 from area_calculation import interaction_area
 from combiner import conbine_models
 
+
 VERSION = "betta_0.1.0"
+
 logging.basicConfig(filename='info.log', level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 parser = argparse.ArgumentParser(description="Пример программы с версией")
@@ -75,14 +76,16 @@ for cloud in clouds:
         particles.append(sphere_cloud(cloud['number_of_particles'], cloud['radius'],
                  cloud["source"], cloud['distribution_type'], cloud['sigma_r']))
         source_points.append(cloud["source"])
-    elif cloud['figure_type'] == 'sphere':
+    elif cloud['figure_type'] == 'cone':
         particles.append(cone_cloud(cloud['number_of_particles'], cloud['radius'],
-                 cloud["source"], cloud['distribution_type'], cloud['sigma_r'], cloud["height"], cloud['orientation_angle'],
-                    cloud['sigma_z']))
+                 cloud["source"], cloud['distribution_type'], cloud['sigma_r'], cloud['sigma_z'], cloud["height"], cloud['orientation_angle']))
+        source_points.append(cloud["source"])
     else:
         raise ValueError("Неизвестная форма облака частиц")
+
 print('Облако частиц успешно создано!')
 
+# models = []
 cells, nodes, _, _ = vtk_reader(models_params[0]["path"])
 orginal_model_p = {}
 orginal_model_p[models_params[0]["path"].split('\\')[-1]] = {'num_cell': len(cells), 'num_nodes': len(nodes)}
@@ -97,12 +100,14 @@ point_data_scal_c = np.zeros((num_cloud_particles, 1))
 
 cell_data = {}
 cell_param_all = np.zeros((len(cells), 1))
+#print('cell', cells)
+# print('nodes', nodes)
 
+# print(orginal_model_p)
 start_time = time.time()
 num_cloud = 0
 index_cloud = 0
 print('Начат процесс пересечения частиц и моделей!')
-
 for cloud in particles:
     cell_param = np.zeros((len(cells), 1))
     for part_num in range(len(cloud)):
@@ -125,7 +130,7 @@ for cloud in particles:
     num_cloud += 1
     cell_data = dict_param(cell_data, f'cloud_{num_cloud}', cell_param)
     index_cloud += len(cloud)
-    
+    # vtk_writer(f'B:\\GMM_2025\\v5\\bmm-math-modeling-MayorIvan1-patch-1\\clouds-{num_cloud}.vtk', cloud)
 print('Обработка процесса пересечения частиц и моделей успешно выполнено!')
 point_data = {}
 point_data_vec_m = np.zeros((len(nodes), 3))
@@ -137,16 +142,21 @@ point_data = dict_param(point_data, 'interaction', point_data_scal)
 
 cell_data = dict_param(cell_data, f'cloud_all', cell_param_all)
 
+
 points_cloud = []
 points_all = np.vstack([nodes, particles[0]])
 for cloud in range(1,len(particles)):
     points_all = np.vstack([points_all, particles[cloud]])
+
 
 point_data_scal_m = np.zeros((len(nodes), 1))
 point_data_scal_c = np.ones((num_cloud_particles, 1))
 point_data_scal = np.vstack([point_data_scal_m, point_data_scal_c])
 point_data = dict_param(point_data, 'mass_point', point_data_scal)
 
+
+# color_cells = {}
+# color_cells = dict_param(color_cells, 'color', cell_param)
 vtk_writer(path_dir, points_all, cells, cell_data, point_data)
 
 all_area = interaction_area(nodes, cells)
@@ -156,11 +166,9 @@ _time = end_time - start_time
 
 print(f'Время выполнения работы программы: {_time:.2f} сек')
 
-logging.info(f"The program has successfully completed it`s work!\n"
-             f"Affected numbers particle: {sum(cell_param_all)} %\n"
-             f"All numbers particle: {np.array(particles).size / 3}\n"
-             f"Probability: {sum(cell_param_all) / (np.array(particles).size / 3)}\n"
-             f"Operating time: {_time}\n"
-             f"Numbers of cells and rays: {len(cells)} * {np.array(particles).size / 3} = {len(cells) * np.array(particles).size / 3}\n")
-
-
+logging.info(f"Программа успешно выполнила работу!\n"
+             f"Количество частиц попавших на модели: {sum(cell_param_all)} %\n"
+             f"Общее количество частиц: {np.array(particles).size / 3}\n"
+             f"Вероятность попадания: {sum(cell_param_all) / (np.array(particles).size / 3)}\n"
+             f"Время выполнения программы: {_time:.2f} сек\n"
+             f"Число ячеек моделей и число частиц: {len(cells)} * {int(np.array(particles).size / 3)} = {len(cells) * int(np.array(particles).size / 3)}\n")
