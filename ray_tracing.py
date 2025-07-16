@@ -1,11 +1,11 @@
 from numpy import cross, dot, array
 
-def ray_tracing_check(orig, part_point, point0, point1, point2):
+def ray_tracing_check(source, part_point, cell):
 
-    E1 = array(point1) - array(point0)
-    E2 = array(point2) - array(point0)
-    D = array(part_point) - array(orig)
-    T = array(orig) - array(point0)
+    E1 = array(cell[1]) - array(cell[0])
+    E2 = array(cell[2]) - array(cell[0])
+    D = array(part_point) - array(source)
+    T = array(source) - array(cell[0])
     total_det = dot(cross(D, E2), E1)
 
     if total_det == 0:

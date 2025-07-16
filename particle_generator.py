@@ -29,7 +29,7 @@ def disk_cloud(num_points, radius, path_particles, filename_cloud, center=[0,0,0
     normal_vector = vector / np.linalg.norm(vector)
 
     return points + center, normal_vector
-def sphere_cloud(num_points, radius, path_particles, filename_cloud, center=[0,0,0], distribution = 'uniform', sigma=0.5):
+def sphere_cloud(num_points, radius=1, center=[0,0,0], distribution = 'uniform', sigma=0.5):
 
     if distribution == 'uniform':
 
@@ -58,7 +58,7 @@ def sphere_cloud(num_points, radius, path_particles, filename_cloud, center=[0,0
 
     return points + center
 
-def cone_cloud(num_points, radius, path_particles, height, filename_cloud, center=[0,0,0], angle_rot = [0,0,0], distribution='uniform',sigma_r=0.5, sigma_z=0.5):
+def cone_cloud(num_points, radius=1, center=[0,0,0], height=1, angle_rot = [0,0,0], distribution='uniform',sigma=[0.5, 0.5]):
     if distribution == 'uniform':
 
         z = np.sqrt(np.random.uniform(0, 1, num_points)) * height
@@ -69,10 +69,10 @@ def cone_cloud(num_points, radius, path_particles, height, filename_cloud, cente
 
     elif distribution == 'gaussian':
 
-        z = np.sqrt(np.abs(np.random.normal(0, sigma_z, num_points)))
+        z = np.sqrt(np.abs(np.random.normal(0, sigma[1], num_points)))
         z = (z - z.min()) / (z.max() - z.min()) * height
         rho = (z / height) * radius
-        r = np.abs(np.random.normal(0, sigma_r, num_points))
+        r = np.abs(np.random.normal(0, sigma[0], num_points))
         r *= (rho / r.max())
         theta = np.random.uniform(0, 2 * np.pi, num_points)
         x = r * np.cos(theta)

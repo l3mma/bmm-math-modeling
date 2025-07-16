@@ -1,20 +1,24 @@
-# MODEL_PARAMETRS
-# path
+project_directory{
+B:\GMM_2025\v5\bmm-math-modeling-MayorIvan1-patch-1\results\final.vtk;
+}
 
-model{"any_path"}
-model{}
 
-# PARTICLES_CLOUD_PARAMETRS
-# figure_type, numder_of_particles, distribution_type, distribution_parametrs, source, radius, height, orientation_angle
-cloud
-{
+model{
+B:\GMM_2025\pythonProject_1\test11.vtk;
+}
+
+
+cloud{
     sphere;
     10;
     uniform;
-    [0.2, 0.3];
-    [0, 0, 1];
-    3;
+    [-1.5,-1.5,-1.5];
+    0.2;
+    0.5;
 
 }
 
-cloud{"cone"; 10; "gaussian"; [0.5]; [1, 2, 3];}
+
+
+
+

@@ -1,52 +1,83 @@
 import numpy as np
 from particle_generator import sphere_cloud, cone_cloud
-from vtk_reader import vtk_reader_cells, vtk_reader_nodes
+from vtk_reader import vtk_reader
 import ray_tracing
-from config_reader import read_config
-from marker_cell import marker_cell, interaction_area
+from vtk_writer import dict_param, vtk_writer
+from config_reader import parse_config
+from area_calculation import interaction_area
 import time
+from combiner import conbine_models
+import logging
 
-_params = read_config("config.txt")
-print(_params)
-if _params['Figure_type'] == 'sphere':
-    sphere_cloud(_params['Numder_of_particles'], _params['Radius'], _params['Path_cloud'],
-                 _params["Source"], _params['distribution_type'])
-else:
-    cone_cloud(_params['Numder_of_particles'], _params['Radius'], _params['Path_cloud'],
-                 _params["Source"], _params["height_cone"], _params['Orientation_angle'],_params['distribution_type'])
+logging.basicConfig(filename='info.log', level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-model = _params["Model"]
-particles = _params['Path_cloud'] + "\\particles.vtk"
-source_coords = _params["Source"]
-cells = vtk_reader_cells(model)
-nodes = vtk_reader_nodes(model)
-nodes_p = vtk_reader_nodes(particles)
-cell_param = np.zeros(len(cells))
+config = parse_config("config.txt")
+models_params = config['models']
+clouds = config['clouds']
+path_dir = config['project_directory'][0]['path']
+particles = []
+source_points = []
 
+for cloud in clouds:
+    if cloud['figure_type'] == 'sphere':
+        particles.append(sphere_cloud(cloud['number_of_particles'], cloud['radius'],
+                 cloud["source"], cloud['distribution_type'], cloud['sigma_r']))
+        source_points.append(cloud["source"])
+    elif cloud['figure_type'] == 'sphere':
+        particles.append(cone_cloud(cloud['number_of_particles'], cloud['radius'],
+                 cloud["source"], cloud['distribution_type'], cloud['sigma_r'], cloud["height"], cloud['orientation_angle'],
+                    cloud['sigma_z']))
+    else:
+        raise ValueError("Неизвестная форма облака частиц")
+
+# models = []
+cells, nodes, _, _ = vtk_reader(models_params[0]["path"])
+orginal_model_p = {}
+orginal_model_p[models_params[0]["path"].split('\\')[-1]] = {'num_cell': len(cells), 'num_nodes': len(nodes)}
+for i in range(1, len(models_params)):
+    path = models_params[i]["path"]
+    cells, nodes = conbine_models(cells, nodes, path)
+    orginal_model_p[path.split('\\')[-1]] = {'num_cell': len(cells), 'num_nodes': len(nodes)}
+
+
+cell_param = np.zeros((len(cells), 1))
+#print('cell', cells)
+# print('nodes', nodes)
+
+# print(orginal_model_p)
 start_time = time.time()
-for part_num in range(len(nodes_p)):
-    length = 0
-    answer = 0
-    interaction, min_interaction = [], []
-    for cell_num in range(len(cells)):
-        answer, length = ray_tracing.ray_tracing_check(source_coords, nodes_p[part_num], nodes[cells[cell_num][0]], nodes[cells[cell_num][1]], nodes[cells[cell_num][2]])
-        if answer == True:
-            interaction.append([length, cell_num])
-    if len(interaction) != 0:
-        min_interaction = min(interaction, key = lambda x: x[0])
-        cell_param[min_interaction[1]] += 1
+num_cloud = 0
+for cloud in particles:
 
-path_save = _params['Path_cloud']
-marker_cell(nodes, cells, cell_param, path_save)
-np.savetxt('cell_data.txt', cell_param)
+    for part_num in range(len(cloud)):
+        length = 0
+        answer = 0
+        interaction, min_interaction = [], []
+        for cell_num in range(len(cells)):
+            answer, length = ray_tracing.ray_tracing_check(source_points[num_cloud], cloud[part_num], nodes[cells[cell_num]])
+            if answer == True:
+                interaction.append([length, cell_num])
+        if len(interaction) != 0:
+            min_interaction = min(interaction, key = lambda x: x[0])
+            cell_param[min_interaction[1]] += 1
+    num_cloud += 1
+    vtk_writer(f'B:\\GMM_2025\\v5\\bmm-math-modeling-MayorIvan1-patch-1\\clouds-{num_cloud}.vtk', cloud)
 
-percent, all_area = interaction_area(cell_param, len(cells), nodes, cells)
+
+color_cells = {}
+color_cells = dict_param(color_cells, 'color', cell_param)
+vtk_writer(path_dir, nodes, cells, color_cells)
+
+all_area = interaction_area(nodes, cells)
 
 end_time = time.time()
 _time = end_time - start_time
 
-print('Процент поражённой площади:', percent * 100,"%")
-print("Вся площадь:", all_area)
-print("Время выполнения программы:",_time, 'при числе ячеек Х лучей =', len(cells) * len(nodes_p))
+logging.info(f"The program has successfully completed it`s work!\n"
+             f"Affected numbers particle: {sum(cell_param)} %\n"
+             f"All numbers particle: {np.array(particles).size / 3}\n"
+             f"Probability: {sum(cell_param) / (np.array(particles).size / 3)}\n"
+             f"Operating time: {_time}\n"
+             f"Numbers of cells and rays: {len(cells)} * {np.array(particles).size / 3} = {len(cells) * np.array(particles).size / 3}\n")
 
 
