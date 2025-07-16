@@ -61,7 +61,6 @@ for cloud in particles:
             min_interaction = min(interaction, key = lambda x: x[0])
             cell_param[min_interaction[1]] += 1
     num_cloud += 1
-    vtk_writer(f'B:\\GMM_2025\\v5\\bmm-math-modeling-MayorIvan1-patch-1\\clouds-{num_cloud}.vtk', cloud)
 
 
 color_cells = {}
