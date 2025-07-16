@@ -1,5 +1,5 @@
 import numpy as np
-import logging,argparse,sys,time
+import logging,argparse,sys,time,os
 
 import ray_tracing
 from particle_generator import sphere_cloud, cone_cloud
@@ -40,12 +40,18 @@ if args.version:
     print(f"Версия программы: {VERSION}")
     sys.exit(0)
 
-# Если нужен файл конфига
 if args.file:
     config_path = args.file
-    print(f"Путь к конфигу: {config_path}")
+    if not os.path.isfile(config_path):
+        print(f"Файл конфигурации '{config_path}' не найден!")
+        sys.exit(1)
 else:
-    print("Файл конфигурации не передан.")
+    # Папка, где лежит exe
+    exe_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+    config_path = os.path.join(exe_dir, "config.txt")
+    if not os.path.isfile(config_path):
+        print("Файл конфигурации не передан и 'config.txt' не найден в папке с программой!")
+        sys.exit(1)
 
 if args.debug > 0:
     print(f"Уровень дебага: {args.debug}")
