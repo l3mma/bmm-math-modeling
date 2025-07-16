@@ -24,6 +24,7 @@ def vtk_writer(path_particles, points, cells=[], cells_data=[], points_data=[]):
             for _ in range(len_c):
                 f.write("5\n")
 
+
         if len_cd != 0:
             f.write("\n")
             f.write(f"CELL_DATA {len_c}\n")
@@ -39,6 +40,7 @@ def vtk_writer(path_particles, points, cells=[], cells_data=[], points_data=[]):
                     f.write(f"VECTORS {name_cd} float\n")
                     for data in cells_data[name_cd]:
                         f.write(f"{data[0]} {data[1]} {data[2]}\n")
+                f.write("\n")
 
         if len_pd != 0:
             f.write("\n")
@@ -55,6 +57,7 @@ def vtk_writer(path_particles, points, cells=[], cells_data=[], points_data=[]):
                     f.write(f"VECTORS {name_pd} float\n")
                     for data in points_data[name_pd]:
                         f.write(f"{data[0]} {data[1]} {data[2]}\n")
+                f.write("\n")
 
 def dict_param(dict, name, data=[]):
     dict[name] = data

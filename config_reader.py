@@ -89,8 +89,3 @@ def parse_config(file_path):
             i += 1
 
     return config
-
-
-# Пример использования
-config = parse_config("config.txt")
-print(config)
