@@ -1,5 +1,4 @@
 import numpy as np
-from vtk_generator import vtk_point_generator
 
 def disk_cloud(num_points, radius, path_particles, filename_cloud, center=[0,0,0],angle_rot = [0,0,0], distribution = 'uniform', sigma=0.5):
     if distribution == 'uniform':
