@@ -10,6 +10,7 @@ from combiner import conbine_models
 
 
 VERSION = "betta_0.1.0"
+start_time = time.time()
 
 logging.basicConfig(filename='info.log', level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
@@ -64,7 +65,7 @@ config = parse_config(config_path)
 if args.debug == 2:
     print(config)
 
-print('Конфигурационный файл успешно прочитан!')
+print(f'Конфигурационный файл успешно загружен')
 models_params = config['models']
 clouds = config['clouds']
 path_dir = config['project_directory'][0]['path']
@@ -83,9 +84,8 @@ for cloud in clouds:
     else:
         raise ValueError("Неизвестная форма облака частиц")
 
-print('Облако частиц успешно создано!')
+print(f'Облако частиц создано')
 
-# models = []
 cells, nodes, _, _ = vtk_reader(models_params[0]["path"])
 orginal_model_p = {}
 orginal_model_p[models_params[0]["path"].split('\\')[-1]] = {'num_cell': len(cells), 'num_nodes': len(nodes)}
@@ -100,14 +100,11 @@ point_data_scal_c = np.zeros((num_cloud_particles, 1))
 
 cell_data = {}
 cell_param_all = np.zeros((len(cells), 1))
-#print('cell', cells)
-# print('nodes', nodes)
 
-# print(orginal_model_p)
-start_time = time.time()
+
 num_cloud = 0
 index_cloud = 0
-print('Начат процесс пересечения частиц и моделей!')
+print(f'Начат процесс пересечения частиц с моделями')
 for cloud in particles:
     cell_param = np.zeros((len(cells), 1))
     for part_num in range(len(cloud)):
@@ -131,7 +128,7 @@ for cloud in particles:
     cell_data = dict_param(cell_data, f'cloud_{num_cloud}', cell_param)
     index_cloud += len(cloud)
     # vtk_writer(f'B:\\GMM_2025\\v5\\bmm-math-modeling-MayorIvan1-patch-1\\clouds-{num_cloud}.vtk', cloud)
-print('Обработка процесса пересечения частиц и моделей успешно выполнено!')
+print('Пересечение частиц с моделями успешно завершено')
 point_data = {}
 point_data_vec_m = np.zeros((len(nodes), 3))
 point_data_vec = np.vstack([point_data_vec_m, point_data_vec_c])
@@ -142,21 +139,16 @@ point_data = dict_param(point_data, 'interaction', point_data_scal)
 
 cell_data = dict_param(cell_data, f'cloud_all', cell_param_all)
 
-
 points_cloud = []
 points_all = np.vstack([nodes, particles[0]])
 for cloud in range(1,len(particles)):
     points_all = np.vstack([points_all, particles[cloud]])
-
 
 point_data_scal_m = np.zeros((len(nodes), 1))
 point_data_scal_c = np.ones((num_cloud_particles, 1))
 point_data_scal = np.vstack([point_data_scal_m, point_data_scal_c])
 point_data = dict_param(point_data, 'mass_point', point_data_scal)
 
-
-# color_cells = {}
-# color_cells = dict_param(color_cells, 'color', cell_param)
 vtk_writer(path_dir, points_all, cells, cell_data, point_data)
 
 all_area = interaction_area(nodes, cells)
@@ -171,4 +163,5 @@ logging.info(f"Программа успешно выполнила работу
              f"Общее количество частиц: {np.array(particles).size / 3}\n"
              f"Вероятность попадания: {sum(cell_param_all) / (np.array(particles).size / 3)}\n"
              f"Время выполнения программы: {_time:.2f} сек\n"
-             f"Число ячеек моделей и число частиц: {len(cells)} * {int(np.array(particles).size / 3)} = {len(cells) * int(np.array(particles).size / 3)}\n")
+             f"Число ячеек моделей и число частиц: {len(cells)} * {int(np.array(particles).size / 3)} = "
+             f"{len(cells) * int(np.array(particles).size / 3)}\n")
