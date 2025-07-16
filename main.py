@@ -1,17 +1,64 @@
 import numpy as np
+import logging,argparse,sys,time
+
+import ray_tracing
 from particle_generator import sphere_cloud, cone_cloud
 from vtk_reader import vtk_reader
-import ray_tracing
 from vtk_writer import dict_param, vtk_writer
 from config_reader import parse_config
 from area_calculation import interaction_area
-import time
 from combiner import conbine_models
-import logging
+
+
+VERSION = "betta_0.1.0"
 
 logging.basicConfig(filename='info.log', level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-config = parse_config("config.txt")
+parser = argparse.ArgumentParser(description="Пример программы с версией")
+parser.add_argument(
+    "-v", "--version",
+    action="store_true",
+    help="Показать версию программы"
+)
+
+parser.add_argument(
+    "-f", "--file",
+    type=str,
+    help="Путь к файлу конфигурации"
+)
+parser.add_argument(
+    "-d", "--debug",
+    type=int,
+    choices=[0, 1, 2],
+    default=0,
+    help="Уровень дебага (0-2)"
+)
+
+args = parser.parse_args()
+
+if args.version:
+    print(f"Версия программы: {VERSION}")
+    sys.exit(0)
+
+# Если нужен файл конфига
+if args.file:
+    config_path = args.file
+    print(f"Путь к конфигу: {config_path}")
+else:
+    print("Файл конфигурации не передан.")
+
+if args.debug > 0:
+    print(f"Уровень дебага: {args.debug}")
+
+if args.version:
+    print(f"Версия программы: {VERSION}")
+    sys.exit(0)
+
+config = parse_config(config_path)
+
+if args.debug == 2:
+    print(config)
+
 print('Конфигурационный файл успешно прочитан!')
 models_params = config['models']
 clouds = config['clouds']
@@ -54,7 +101,7 @@ cell_param_all = np.zeros((len(cells), 1))
 start_time = time.time()
 num_cloud = 0
 index_cloud = 0
-print('Начат процесс пересечения частиц и моделей успешно выполнено!')
+print('Начат процесс пересечения частиц и моделей!')
 for cloud in particles:
     cell_param = np.zeros((len(cells), 1))
     for part_num in range(len(cloud)):
@@ -111,7 +158,7 @@ all_area = interaction_area(nodes, cells)
 end_time = time.time()
 _time = end_time - start_time
 
-print(f'Время выполнения работы программы: {_time} сек')
+print(f'Время выполнения работы программы: {_time:.2f} сек')
 
 logging.info(f"The program has successfully completed it`s work!\n"
              f"Affected numbers particle: {sum(cell_param_all)} %\n"
